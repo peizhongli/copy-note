@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "密码场景记录器",
+  "version": "1.0",
+  "description": "记录涉及网页密码的场景",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/logo.png",
+      "48": "icons/logo.png",
+      "128": "icons/logo.png"
+    }
+  },
+  "permissions": ["storage"]
+}
