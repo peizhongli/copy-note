@@ -88,8 +88,12 @@
       }
       .top-wrap {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-bottom: 8px;
+      }
+      #import-export-buttons {
+        display: flex;
+        gap: 5px;
       }
       .no-data {
         text-align: center;
@@ -105,8 +109,13 @@
   </head>
   <body>
     <div class="top-wrap">
+      <div id="import-export-buttons">
+        <button id="import-btn" class="btn-secondary">导入</button>
+        <button id="export-btn" class="btn-neutral">导出</button>
+      </div>
       <button id="add-btn" class="btn-primary">+ 添加</button>
     </div>
+    <input type="text" id="import-input" class="hidden" placeholder="粘贴导入数据" />
     <div id="add-form" class="hidden">
       <div class="form-group">
         <label for="description">描述</label>

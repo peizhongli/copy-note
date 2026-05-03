@@ -73,6 +73,80 @@ function bindEvents() {
   // 添加按钮点击事件
   document.getElementById("add-btn").addEventListener("click", () => {
     document.getElementById("add-form").classList.remove("hidden");
+    document.getElementById("import-export-buttons").classList.add("hidden");
+  });
+  
+  // 导出按钮点击事件
+  document.getElementById("export-btn").addEventListener("click", async () => {
+    const data = await chrome.storage.local.get(STORAGE_KEY);
+    const scenes = data[STORAGE_KEY] || [];
+    const jsonData = JSON.stringify(scenes);
+    await navigator.clipboard.writeText(jsonData);
+    alert("数据已复制到剪贴板");
+  });
+  
+  // 导入按钮点击事件
+  document.getElementById("import-btn").addEventListener("click", async () => {
+    // 尝试从剪贴板读取数据
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      if (clipboardText) {
+        try {
+          const importedData = JSON.parse(clipboardText);
+          if (Array.isArray(importedData)) {
+            // 确认导入
+            if (confirm(`确定要导入 ${importedData.length} 条记录吗？`)) {
+              const data = await chrome.storage.local.get(STORAGE_KEY);
+              let scenes = data[STORAGE_KEY] || [];
+              
+              // 合并数据，避免重复（根据id判断）
+              const existingIds = new Set(scenes.map(s => s.id));
+              importedData.forEach(item => {
+                if (!existingIds.has(item.id)) {
+                  scenes.push(item);
+                }
+              });
+              
+              await saveData(scenes);
+              alert("导入成功");
+            }
+            return;
+          }
+        } catch (e) {
+          // 剪贴板内容不是有效的JSON，继续提示用户
+        }
+      }
+    } catch (e) {
+      // 无法读取剪贴板，继续提示用户
+    }
+    
+    // 提示用户粘贴数据
+    const jsonData = prompt("请粘贴要导入的JSON数据：");
+    if (jsonData) {
+      try {
+        const importedData = JSON.parse(jsonData);
+        if (Array.isArray(importedData)) {
+          if (confirm(`确定要导入 ${importedData.length} 条记录吗？`)) {
+            const data = await chrome.storage.local.get(STORAGE_KEY);
+            let scenes = data[STORAGE_KEY] || [];
+            
+            const existingIds = new Set(scenes.map(s => s.id));
+            importedData.forEach(item => {
+              if (!existingIds.has(item.id)) {
+                scenes.push(item);
+              }
+            });
+            
+            await saveData(scenes);
+            alert("导入成功");
+          }
+        } else {
+          alert("无效的数据格式，请提供JSON数组");
+        }
+      } catch (e) {
+        alert("无效的JSON格式");
+      }
+    }
   });
 
   document.getElementById("save-btn").addEventListener("click", async () => {
@@ -121,6 +195,7 @@ function bindEvents() {
     document.getElementById("password").value = "";
     document.getElementById("add-form").classList.add("hidden");
     document.getElementById("cancel-btn").style.display = "none";
+    document.getElementById("import-export-buttons").classList.remove("hidden");
 
     await saveData(scenes);
   });
@@ -132,6 +207,7 @@ function bindEvents() {
     document.getElementById("password").value = "";
     document.getElementById("cancel-btn").style.display = "none";
     document.getElementById("add-form").classList.add("hidden");
+    document.getElementById("import-export-buttons").classList.remove("hidden");
   });
 }
 
@@ -196,6 +272,7 @@ function bindListEvents() {
       const scene = scenes.find((s) => s.id === id);
       if (scene) {
         document.getElementById("add-form").classList.remove("hidden");
+        document.getElementById("import-export-buttons").classList.add("hidden");
         document.getElementById("description").value = scene.description;
         document.getElementById("key").value = scene.key;
         document.getElementById("password").value = scene.password;
